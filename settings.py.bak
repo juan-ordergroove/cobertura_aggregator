@@ -1,0 +1,10 @@
+SETTINGS = {
+    'Name of Configureation': {
+        'VENV_SOURCE': '',
+        'SOURCE': '',
+        'MANAGE_PATH': '',
+        'OMIT': [],
+        'FOLDERS': [
+        ]
+    }
+}
