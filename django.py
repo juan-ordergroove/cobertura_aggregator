@@ -11,9 +11,11 @@ except ImportError as exc:
 
 def subprocess_cmd(command):
     """Run multipe commands in subprocess module"""
+    if '--dry-run' in sys.argv:
+        print command
+        return
     process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-    proc_stdout = process.communicate()[0].strip()
-    print proc_stdout
+    process.communicate()[0].strip()
 
 
 def build_coverage_args(settings):
@@ -28,8 +30,8 @@ def build_coverage_args(settings):
         "test"
         ]
 
-    if hasattr(settings, 'APPS'):
-        cov_args.append(settings.APPS)
+    if settings.get('APPS'):
+        cov_args += settings['APPS']
     return cov_args
 
 
@@ -98,8 +100,9 @@ def analyze_report(name, settings, coverage_report):
     total = 0
     total_missed = 0
     coverage = 0
+    report = []
     for folder in _folders:
-        print '{}: {}%'.format(folder, _folders[folder]['stats']['coverage'])
+        report.append('{}: {}%'.format(folder, _folders[folder]['stats']['coverage']))
         total += _folders[folder]['stats']['total']
         total_missed += _folders[folder]['stats']['total_missed']
     if total_missed:
@@ -107,11 +110,13 @@ def analyze_report(name, settings, coverage_report):
         coverage = 100 - percent_total
     else:
         coverage = float(100)
-    print 'Core Coverage: %.2f%%' % coverage
+    report.append('Core Coverage: %.2f%%' % coverage)
+    return report
 
 
 def run():
     """Coverage summary runner"""
+    reports = {}
     for name, project_settings in SETTINGS.iteritems():
         # Run the tests and prep for the next report
         if "--regenerate" in sys.argv:
@@ -126,8 +131,19 @@ def run():
         process_list += ['&& coverage report -m > {}'.format(coverage_report)]
         subprocess_cmd(' '.join(process_list))
 
-        analyze_report(name, project_settings, coverage_report)
-        subprocess_cmd('rm -f {}'.format(coverage_report))
+        if '--dry-run' not in sys.argv:
+            reports[name] = analyze_report(
+                name,
+                project_settings,
+                coverage_report
+                )
+            subprocess_cmd('rm -f {}'.format(coverage_report))
+
+    for name, report in reports.iteritems():
+        print name
+        for row in report:
+            print row
+        print ''
 
 if __name__ == '__main__':
     run()
