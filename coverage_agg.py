@@ -17,7 +17,7 @@ def subprocess_cmd(command, dry_run=False):
 class CoverageAggregator(object):
     """Coverage report aggregator"""
 
-    def __init__(self, settings={}, dry_run=False):
+    def __init__(self, settings={}, dry_run=False, verbose=False):
         if settings:
             self._validate(settings)
         self._name = settings.get('NAME', 'Unnamed')
@@ -26,6 +26,7 @@ class CoverageAggregator(object):
         self._targets = settings.get('TARGETS')
         self._apps = settings.get('APPS', [])
         self._dry_run = dry_run
+        self._verbose = verbose
         self._tmp_coverage_report = ''
         self._report = []
 
@@ -37,9 +38,9 @@ class CoverageAggregator(object):
         """_name getter"""
         return self._name
 
-    def set_settings(self, settings, dry_run=False):
+    def set_settings(self, settings, dry_run=False, verbose=False):
         """Reset instance settings"""
-        self.__init__(settings, dry_run)
+        self.__init__(settings, dry_run, verbose)
 
     def run(self):
         """Aggregator runner"""
@@ -93,9 +94,6 @@ class CoverageAggregator(object):
                 'coverage': '0',
             }
 
-        total = 0
-        total_missed = 0
-        coverage = 0
         with open(self._tmp_coverage_report) as coverage_file:
             for line in coverage_file:
                 for target in target_stats:
@@ -103,6 +101,8 @@ class CoverageAggregator(object):
                         continue
 
                     if line.find(target) == 0:
+                        if self._verbose:
+                            print line.strip()
                         stats = line.split()
                         curr_stats = self._analyze_line(
                             stats,
@@ -110,8 +110,8 @@ class CoverageAggregator(object):
                             )
                         target_stats[target] = curr_stats
 
-                        total += target_stats[target]['total']
-                        total_missed += target_stats[target]['total_missed']
+        total = 0
+        total_missed = 0
 
         # Use the array self._targets to ensure order...
         for target in self._targets:
@@ -119,7 +119,10 @@ class CoverageAggregator(object):
                 target,
                 target_stats[target]['coverage'])
             )
+            total += target_stats[target]['total']
+            total_missed += target_stats[target]['total_missed']
 
+        coverage = 0
         if total_missed:
             percent_total = float(total_missed) / float(total) * 100
             coverage = 100 - percent_total
@@ -161,10 +164,11 @@ if __name__ == '__main__':
 
     # Convert to use python argparse built in
     dry_run = '--dry-run' in sys.argv
+    verbose = '--verbose' in sys.argv
     coverage_aggregator = CoverageAggregator()
     reports = {}
     for settings in SETTINGS:
-        coverage_aggregator.set_settings(settings, dry_run)
+        coverage_aggregator.set_settings(settings, dry_run, verbose)
         coverage_aggregator.run()
         reports[coverage_aggregator.get_report_name()] = coverage_aggregator.get_report()
 
