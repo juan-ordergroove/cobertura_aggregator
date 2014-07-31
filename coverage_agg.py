@@ -52,6 +52,15 @@ class CoberturaAggregator(object):
         for classes in root.iter('classes'):
             self._get_stats(target_stats, classes)
 
+        print "Target\t\tLine%\t\tBranch%"
+        for target in self._targets:
+            stats = target_stats[target]
+            print "{}:\t\t{}%\t\t{}%".format(
+                target,
+                stats['line_coverage'],
+                stats['cond_coverage']
+                )
+
     def _get_stats(self, target_stats, classes):
         """Search for target aggregations"""
         cobertura_class = classes.find('class')
