@@ -1,10 +1,9 @@
-SETTINGS = {
-    'Name of Configureation': {
-        'VENV_SOURCE': '',
-        'SOURCE': '',
-        'MANAGE_PATH': '',
-        'OMIT': [],
-        'FOLDERS': [
+SETTINGS = [
+    {
+        'NAME': "Aggregation Config Name",
+        'REPORT_PATH': '/path/to/cobertura.xml',
+        'TARGETS': [
+
         ]
     }
-}
+]

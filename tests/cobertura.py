@@ -1,10 +1,9 @@
 """Coverage aggregator tests"""
 import os
 import unittest
-from coverage_agg import CoberturaAggregator
+from cobertura_agg import CoberturaAggregator
 
 COBERTURA_SETTINGS = {
-    'TYPE': 'cobertura',
     'NAME': 'cobertura_test',
     'REPORT_PATH': os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
@@ -24,11 +23,48 @@ class CoberturaAggregationTests(unittest.TestCase):
         self.aggregator = CoberturaAggregator(COBERTURA_SETTINGS)
 
     def test_report_generator(self):
+        """Test generating a report"""
         self.aggregator.generate_report()
         expected_result = [
-            'Target\t\tLine%\t\tBranch%',
-            'mytests:\t\t73.33%\t\t48.65%',
-            'widget_core/v3/core-model.js:\t\t84.44%\t\t77.01%',
-            'widget_core/common/getElementsByRegex.js:\t\t100.00%\t\t100.00%'
-            ]
+            ['mytests', 73.33333333333333, 48.64864864864865],
+            ['widget_core/v3/core-model.js', 84.44444444444444, 77.00892857142857],
+            ['widget_core/common/getElementsByRegex.js', 100.0, 100.0]
+        ]
         self.assertEqual(self.aggregator._report, expected_result)
+
+    def test_validations(self):
+        """Test empty TARGETS configuration"""
+        settings = COBERTURA_SETTINGS
+        del settings[self.aggregator.TARGETS_KEY]
+
+        self.assertRaises(
+            AssertionError,
+            self.aggregator.set_settings,
+            settings
+        )
+
+        del settings[self.aggregator.REPORT_PATH_KEY]
+        self.assertRaises(
+            AssertionError,
+            self.aggregator.set_settings,
+            settings
+        )
+
+    def test_parse_branch_stats(self):
+        """Branch stat parsing unit tests"""
+        test_string = ""
+        self.assertRaises(
+            ValueError,
+            self.aggregator._parse_branch_stats,
+            test_string
+            )
+
+        test_string = "(4/5)"
+        covered, total = self.aggregator._parse_branch_stats(test_string)
+        self.assertEqual(covered, 4)
+        self.assertEqual(total, 5)
+
+        test_string = "XY% (4/5)"
+        covered, total = self.aggregator._parse_branch_stats(test_string)
+        self.assertEqual(covered, 4)
+        self.assertEqual(total, 5)
