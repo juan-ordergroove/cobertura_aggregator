@@ -128,17 +128,3 @@ class CoberturaAggregator(object):
         branch_stats = s[s.find("(")+1:s.find(")")]
         covered, total = branch_stats.split('/')
         return int(covered), int(total)
-
-
-if __name__ == '__main__':
-    try:
-        from settings import SETTINGS
-    except ImportError as exc:
-        raise "Settings module error: {}".format(exc)
-
-    # Convert to use python argparse built in
-    aggregator = CoberturaAggregator()
-    for settings in SETTINGS:
-        aggregator.set_settings(settings)
-        aggregator.generate_report()
-        aggregator.print_report()
