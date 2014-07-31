@@ -11,6 +11,10 @@ Here's an explanation of the settings configuration options:
 - REPORT_PATH - path to coverage report
 - TARGETS - list of folder/file names that you want summarized. They should be relative paths based on the current working directory of the test suite
 
+Usage
+- Define your settings
+- python cobertura_agg.py
+
 Dependencies:
 - python2.7
 - https://pypi.python.org/pypi/tabulate
