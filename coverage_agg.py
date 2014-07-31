@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 import uuid
+import xml.etree.ElementTree as ET
 
 
 def subprocess_cmd(command, dry_run=False):
@@ -12,6 +13,95 @@ def subprocess_cmd(command, dry_run=False):
         return
     process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
     process.communicate()[0].strip()
+
+
+class CoberturaAggregator(object):
+    """Cobertura report aggregator"""
+    def __init__(self, settings={}):
+        self._name = settings.get('NAME')
+        self._report_path = settings.get('REPORT_PATH')
+        self._targets = settings.get('TARGETS')
+        self._report = []
+
+        self._xml_tree = ET.parse(self._report_pato)
+
+    def generate_report(self):
+        """
+            for each <classes> tags
+             if any TARGETS are in the <class> "filename" attribute
+             for each <line> tag
+              increment line counter
+              if "hits" attribute > 0, increment covered counter
+              if "branch" attribute == True, increment branch
+               total and branch coverage total
+             update coverage percentages
+            iterate over stats and compute totals
+        """
+        target_stats = {}
+        for target in self._targets:
+            target_stats[target] = {
+                'lines': 0,
+                'lines_missed': 0,
+                'cond': 0,
+                'cond_missed': 0,
+                'line_coverage': '0',
+                'cond_coverage': '0',
+            }
+
+        root = self._xml_tree.getroot()
+        for classes in root.iter('classes'):
+            self._get_stats(target_stats, classes)
+
+    def _get_stats(self, target_stats, classes):
+        """Search for target aggregations"""
+        cobertura_class = classes.find('class')
+        class_fn = cobertura_class.get('filename')
+        for target in self._targets:
+            if class_fn.find(target) == 0:
+                self._get_target_stats(target, target_stats, classes)
+
+    def _get_target_stats(self, target, target_stats, classes):
+        """Update target aggregation"""
+        lines_covered = 0
+        total_lines = 0
+        branches_covered = 0
+        total_branches = 0
+
+        for line in classes.iter('line'):
+            total_lines += 1
+            if int(line.get('hits')) > 0:
+                lines_covered += 1
+
+            if bool(line.get('branch')):
+                branch_stats = line.get('condition-coverage')
+                b_covered, \
+                    b_total = self._parse_branch_stats(branch_stats)
+                branches_covered += b_covered
+                total_branches += b_total
+
+        stats = target_stats[target]
+        stats['lines'] += total_lines
+        stats['lines_missed'] += (total_lines - lines_covered)
+        if total_lines:
+            perc = float(stats['lines_missed']) / float(stats['lines'])
+            stats['line_coverage'] = 100 - (perc * 100)
+        else:
+            stats['line_coverage'] = stats['line_coverage'] or float(100)
+
+        stats['cond'] += total_branches
+        stats['cond_missed'] += (total_branches - branches_covered)
+        if total_branches:
+            perc = float(stats['cond_missed']) / float(stats['cond'])
+            stats['cond_coverage'] = 100 - (perc * 100)
+        else:
+            stats['cond_coverage'] = stats['line_coverage'] or float(100)
+
+    @staticmethod
+    def _parse_branch_stats(s):
+        """Parse branch string from XML: condition-coverage="50% (1/2)" """
+        branch_stats = s[s.find("(")+1:s.find(")")]
+        branch_stats = branch_stats.split('/')
+        return branch_stats[0], branch_stats[1]
 
 
 class CoverageAggregator(object):
@@ -24,7 +114,6 @@ class CoverageAggregator(object):
         self._venv_source = settings.get('VENV_SOURCE')
         self._report_path = settings.get('REPORT_PATH')
         self._targets = settings.get('TARGETS')
-        self._apps = settings.get('APPS', [])
         self._dry_run = dry_run
         self._verbose = verbose
         self._tmp_coverage_report = ''
