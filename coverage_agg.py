@@ -23,7 +23,7 @@ class CoberturaAggregator(object):
         self._targets = settings.get('TARGETS')
         self._report = []
 
-        self._xml_tree = ET.parse(self._report_pato)
+        self._xml_tree = ET.parse(self._report_path)
 
     def generate_report(self):
         """
@@ -52,14 +52,15 @@ class CoberturaAggregator(object):
         for classes in root.iter('classes'):
             self._get_stats(target_stats, classes)
 
-        print "Target\t\tLine%\t\tBranch%"
+        self._report.append("Target\t\tLine%\t\tBranch%")
         for target in self._targets:
             stats = target_stats[target]
-            print "{}:\t\t{}%\t\t{}%".format(
+            self._report.append("{}:\t\t{:.2f}%\t\t{:.2f}%".format(
                 target,
                 stats['line_coverage'],
                 stats['cond_coverage']
                 )
+            )
 
     def _get_stats(self, target_stats, classes):
         """Search for target aggregations"""
@@ -81,7 +82,7 @@ class CoberturaAggregator(object):
             if int(line.get('hits')) > 0:
                 lines_covered += 1
 
-            if bool(line.get('branch')):
+            if line.get('branch') == "true":
                 branch_stats = line.get('condition-coverage')
                 b_covered, \
                     b_total = self._parse_branch_stats(branch_stats)
@@ -110,7 +111,7 @@ class CoberturaAggregator(object):
         """Parse branch string from XML: condition-coverage="50% (1/2)" """
         branch_stats = s[s.find("(")+1:s.find(")")]
         branch_stats = branch_stats.split('/')
-        return branch_stats[0], branch_stats[1]
+        return int(branch_stats[0]), int(branch_stats[1])
 
 
 class CoverageAggregator(object):
