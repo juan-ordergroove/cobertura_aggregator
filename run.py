@@ -1,6 +1,9 @@
+"""Cobertura aggregation runner"""
 from cobertura_agg import CoberturaAggregator
 
-if __name__ == '__main__':
+
+def run():
+    """runner"""
     try:
         from settings import SETTINGS
     except ImportError as exc:
@@ -8,7 +11,10 @@ if __name__ == '__main__':
 
     # Convert to use python argparse built in
     aggregator = CoberturaAggregator()
-    for settings in SETTINGS:
-        aggregator.set_settings(settings)
+    for name, settings in SETTINGS.iteritems():
+        aggregator.set_settings(name, settings)
         aggregator.generate_report()
         aggregator.print_report()
+
+if __name__ == '__main__':
+    run()

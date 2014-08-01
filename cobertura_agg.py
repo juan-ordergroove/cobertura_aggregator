@@ -1,20 +1,19 @@
 """Cobertura XML report aggregator for a given set of TARGETS"""
-import os
+import calendar
+import time
 import xml.etree.ElementTree as ET
 from tabulate import tabulate
 
 
 class CoberturaAggregator(object):
     """Cobertura report aggregator"""
-    NAME_KEY = 'NAME'
     REPORT_PATH_KEY = 'REPORT_PATH'
+    COBERTURA_REPORT_KEY = 'COBERTURA_REPORT'
     TARGETS_KEY = 'TARGETS'
 
-    def __init__(self, settings={}):
-        if settings:
-            self._validate(settings)
-
-        self._name = settings.get(self.NAME_KEY, 'Unnamed')
+    def __init__(self, name=None, settings={}):
+        self._name = name
+        self._cobertura_report_path = settings.get(self.COBERTURA_REPORT_KEY, [])
         self._report_path = settings.get(self.REPORT_PATH_KEY, '')
         self._targets = settings.get(self.TARGETS_KEY, [])
         self._report = []
@@ -25,30 +24,36 @@ class CoberturaAggregator(object):
                 'lines_missed': 0,
                 'cond': 0,
                 'cond_missed': 0,
-                'line_coverage': '0',
-                'cond_coverage': '0',
+                'line_coverage': float(0),
+                'cond_coverage': float(0),
             }
 
+        self._xml_tree = None
+        if self._report_path and self._report_path[-1] != '/':
+            self._report_path = '{}/'.format(self._report_path)
 
-        if settings:
-            self._xml_tree = ET.parse(self._report_path)
+        # /path/to/file/1387487334_cobertura_agg.txt
+        self._report_file = '{}{}_cobertura_agg.txt'.format(
+            self._report_path,
+            calendar.timegm(time.gmtime())
+            )
 
-    @classmethod
-    def _validate(cls, settings):
-        """Config validator"""
-        report_path = settings.get(cls.REPORT_PATH_KEY)
-        assert report_path, "Please provide a REPORT_PATH configuration"
-        assert os.path.exists(report_path), "REPORT_PATH does not exist"
-        assert settings.get(cls.TARGETS_KEY), "Please provide TARGETS in settings"
-
-    def set_settings(self, settings):
+    def set_settings(self, name, settings):
         """Reset instance settings"""
-        self.__init__(settings)
+        self.__init__(name, settings)
+
+    def get_report_file(self):
+        return self._report_file
 
     def print_report(self):
         """Print the report"""
         headers = ['Target', 'Line%', 'Branch%']
-        print tabulate(self._report, headers)
+        table = tabulate(self._report, headers)
+        print(table)
+
+        if self._report_path:
+            with open(self._report_file, 'w+') as report_file:
+                report_file.write(table)
 
     def generate_report(self):
         """
@@ -62,18 +67,22 @@ class CoberturaAggregator(object):
              update coverage percentages
             iterate over stats and compute totals
         """
-        root = self._xml_tree.getroot()
-        for classes in root.iter('classes'):
-            self._get_stats(classes)
 
-        for target in self._targets:
-            stats = self._target_stats[target]
-            self._report.append([
-                target,
-                stats['line_coverage'],
-                stats['cond_coverage']
-                ]
-            )
+        for cobertura_report in self._cobertura_report_path:
+            xml_tree = ET.parse(cobertura_report)
+
+            root = xml_tree.getroot()
+            for classes in root.iter('classes'):
+                self._get_stats(classes)
+
+            for target in self._targets:
+                stats = self._target_stats[target]
+                self._report.append([
+                    target,
+                    "{:.2f}%".format(stats['line_coverage']),
+                    "{:.2f}%".format(stats['cond_coverage'])
+                    ]
+                )
 
     def _get_stats(self, classes):
         """Search for target aggregations"""
