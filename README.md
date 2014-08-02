@@ -21,7 +21,7 @@ Here's a sample of the coverage settings dict:
 Another sample of the cobertura settings dict:
 ```python
 {
-    "<NAME>" {
+    "NAME" {
         "TYPE" "cobertura_json"
         "COBERTURA_URLS" "http://jenkins.domain/job/build/1/cobertura/api/json?depth=3",
         "TARGETS": <SAME_AS_ABOVE>",
@@ -43,7 +43,7 @@ You can mix and match as many of these objects as you like in your settings file
 ```
 
 Here's what each means:
-- <NAME> - the application/project name you'd like to define for a config
+- "NAME" - the application/project name you'd like to define for a config - this can be whatever you like
 - TYPE - the format type aggregation against [coverage_xml OR cobertura_json]
 - TARGETS - list of folder/file names that you want summarized. They should be relative paths based on the current working directory of the test suite
 - REPORT_PATH - [optional] - path to write report file to
