@@ -1,7 +1,7 @@
 coverage_analyzer
 =================
 
-A utility to help summarize reports from Cobertura XML files
+A utility to help summarize reports from Jenkins Cobertura REST API calls or coverage XML files
 
 A settings module is required, as you know where the locations of your coverage
 reports live.
