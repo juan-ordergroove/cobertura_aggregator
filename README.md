@@ -53,7 +53,7 @@ Here's what each means:
 
 Usage
 - Define your settings file
-- python run.py --file <PATH_TO_SETTINGS_FILE>
+- python run.py --file /path/to/settings_file
 
 Dependencies:
 - python2.7
