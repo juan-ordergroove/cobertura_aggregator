@@ -1,0 +1,2 @@
+from .cobertura import CoberturaJSONAggregatorTests
+from .coverage import CoverageXMLAggregatorTests

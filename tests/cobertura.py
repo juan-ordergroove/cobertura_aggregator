@@ -1,53 +1,38 @@
-"""Coverage aggregator tests"""
+"""Cobertura aggregator tests"""
 import os
 import unittest
-from cobertura_agg import CoberturaAggregator
+from mock import patch
+from base import CoberturaJSONAggregator
 
 COBERTURA_SETTINGS = {
-    'COBERTURA_REPORT': [os.path.join(
-        os.path.dirname(os.path.abspath(__file__)),
-        'fixtures/cobertura_sample.xml'
-        )],
-    'TARGETS': [
-        'mytests',
-        'widget_core/v3/core-model.js',
-        'widget_core/common/getElementsByRegex.js'
-    ]
+    CoberturaJSONAggregator.COBERTURA_URL_KEY: [
+        'http://localhost/jobs/build/196/cobertura/api/json?depth=4'
+    ],
+    CoberturaJSONAggregator.TARGETS_KEY: [
+        'club',
+        'cron',
+    ],
 }
 
 
-class CoberturaAggregationTests(unittest.TestCase):
-    """Test cases for agggreating cobertura reports"""
+class CoberturaJSONAggregatorTests(unittest.TestCase):
+    """Test cases for aggregating cobertura JSON via Jenkins REST API"""
     def setUp(self):
-        self.test_name = 'tests'
-        self.aggregator = CoberturaAggregator(self.test_name, COBERTURA_SETTINGS)
+        self.test_name = 'test'
+        self.aggregator = CoberturaJSONAggregator(self.test_name, COBERTURA_SETTINGS)
+        fixture_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            'fixtures/cobertura.json'
+        )
+        with open(fixture_path) as fixture_file:
+            self._cobertura_json = fixture_file.read()
 
-    def test_report_generator(self):
-        """Test generating a report"""
+    @patch('base.urllib2.urlopen')
+    def test_report_generator(self, mock_urlopen):
+        mock_urlopen().read.return_value = self._cobertura_json
         self.aggregator.generate_report()
         expected_result = [
-            ['mytests', '73.33%', '48.65%'],
-            ['widget_core/v3/core-model.js', '84.44%', '77.01%'],
-            ['widget_core/common/getElementsByRegex.js', '100.00%', '100.00%']
+            ['club', '67.50%', '62.50%'],
+            ['cron', '8.15%', '6.25%']
         ]
         self.assertEqual(self.aggregator._report, expected_result)
-
-    def test_print_report(self):
-        """Test report generation"""
-        settings = COBERTURA_SETTINGS
-        settings[self.aggregator.REPORT_PATH_KEY] = '/tmp/'
-        self.aggregator.set_settings(self.test_name, COBERTURA_SETTINGS)
-
-        self.aggregator.generate_report()
-        self.aggregator.print_report()
-
-        report_file = self.aggregator.get_report_file()
-        with open(report_file) as report:
-            self.assertEqual(report.read(),
-                             """Target                                    Line%    Branch%
-----------------------------------------  -------  ---------
-mytests                                   73.33%   48.65%
-widget_core/v3/core-model.js              84.44%   77.01%
-widget_core/common/getElementsByRegex.js  100.00%  100.00%"""
-                             )
-        os.unlink(report_file)
