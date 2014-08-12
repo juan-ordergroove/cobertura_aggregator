@@ -9,23 +9,29 @@ reports live.
 Here's a sample of the coverage settings dict:
 ```python
 {
-    "<NAME>" {
-        "TYPE" "coverage_xml"
-        "COVERAGE_XML" ["path/to/xml1" "path/to/xml2"
-        "TARGETS" ["target1" "target/2"],
-        "REPORT_PATH" "/path/to/report"
-    }
-}
-```
-
-Another sample of the cobertura settings dict:
-```python
-{
-    "NAME" {
-        "TYPE" "cobertura_json"
-        "COBERTURA_URLS" "http://jenkins.domain/job/build/1/cobertura/api/json?depth=3",
-        "TARGETS": <SAME_AS_ABOVE>",
-        "REPORT_PATH": <SAME_AS_ABOVE>"
+    "NAME_1": {
+        "TYPE": "cobertura_json",
+        "USERNAME": "username",
+        "API_TOKEN": "api_token",
+        "COBERTURA_URLS": [
+            "http://jenkins.domain.com/job/build/lastSuccessfulBuild/cobertura/api/json?depth=4"
+        ],
+        "TARGETS": [
+            "target1",
+            "target2"
+        ]
+    },
+    "NAME_2": {
+        "TYPE": "coverage_xml",
+        "COVERAGE_XML": [
+            "path/to/xml1",
+            "path/to/xml2"
+        ],
+        "TARGETS": [
+            "target1",
+            "target_2"
+        ],
+        "REPORT_PATH": "/path/to/report"
     }
 }
 ```
