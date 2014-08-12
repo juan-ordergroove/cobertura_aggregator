@@ -17,7 +17,6 @@ def run():
     cobertura_agg = CoberturaJSONAggregator()
     coverage_agg = CoverageXMLAggregator()
     for name, settings in settings_dict.iteritems():
-        print name, settings
         agg_type = settings.get(CoverageXMLAggregator.TYPE_KEY)
         if agg_type == 'coverage_xml':
             aggregator = coverage_agg

@@ -1,4 +1,5 @@
 """Coverage XML report aggregator for a given set of TARGETS"""
+import base64
 import calendar
 import simplejson
 import time
@@ -50,6 +51,12 @@ class CoverageAggregator(object):
         """Print the report"""
         headers = ['Target', 'Line%', 'Branch%']
         table = tabulate(self._report, headers)
+        print """
+
+---------
+{} REPORT
+---------
+""".format(self._name)
         print(table)
 
         if self._report_path:
@@ -109,6 +116,8 @@ class CoverageAggregator(object):
 class CoberturaJSONAggregator(CoverageAggregator):
     """Cobertura REST JSON aggregator"""
     COBERTURA_URL_KEY = 'COBERTURA_URLS'
+    USERNAME_KEY = 'USERNAME'
+    API_TOKEN_KEY = 'API_TOKEN'
     _LINES_KEY = 'Lines'
     _CONDITIONALS_KEY = 'Conditionals'
     _NUMERATOR_KEY = 'numerator'
@@ -117,18 +126,31 @@ class CoberturaJSONAggregator(CoverageAggregator):
     def __init__(self, name=None, settings={}):
         super(CoberturaJSONAggregator, self).__init__(name, settings)
         self._cobertura_urls = settings.get(self.COBERTURA_URL_KEY, [])
+        self._username = settings.get(self.USERNAME_KEY)
+        self._api_token = settings.get(self.API_TOKEN_KEY)
 
     def generate_report(self):
         for cobertura_url in self._cobertura_urls:
+            auth_header = 'Basic: ' + base64.b64encode('%s:%s' % (
+                self._username,
+                self._api_token
+                )
+            ).strip()
+            headers = {'Authorization': auth_header}
+            request = urllib2.Request(
+                cobertura_url,
+                headers=headers
+            )
+
             try:
-                resp = urllib2.urlopen(cobertura_url)
+                resp = urllib2.urlopen(request, timeout=5)
                 cobertura_json = resp.read()
                 cobertura_report = simplejson.loads(cobertura_json)
             except urllib2.HTTPError as e:
-                print "{}\nCobertura URL error: {}".format(
-                    cobertura_url,
-                    e
-                    )
+                print "{}\nHTTP error: {}".format(cobertura_url, e)
+                continue
+            except urllib2.URLError as e:
+                print "{}\nURL error: {}".format(cobertura_url, e)
                 continue
             except simplejson.scanner.JSONDecodeError as e:
                 print "{}\nCobertura URL did not return valid json: {}".format(

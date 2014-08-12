@@ -1,8 +1,0 @@
-SETTINGS = {
-    'Aggregation Config Name': {
-        'REPORT_PATH': ['/path/to/cobertura.xml'],
-        'TARGETS': [
-
-        ]
-    }
-}
