@@ -3,7 +3,7 @@ coverage_analyzer
 
 A utility to help summarize reports from Jenkins Cobertura REST API calls or coverage XML files
 
-A settings module is required, as you know where the locations of your coverage
+A config file is required, as you know where the locations of your coverage
 reports live.
 
 Here's a sample of the coverage settings dict:
@@ -58,8 +58,8 @@ Here's what each means:
 
 
 Usage
-- Define your settings file
-- python run.py --file /path/to/settings_file
+- Define your config file
+- python run.py --file /path/to/config_file
 
 Dependencies:
 - python2.7
