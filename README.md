@@ -25,8 +25,8 @@ SETTINGS = {
     "NAME_2": {
         "TYPE": "xml",
         "XML_FILES": [
-            "path/to/xml_1",
-            "path/to/xml_2"
+            "/path/to/xml_1",
+            "/path/to/xml_2"
         ],
         "TARGETS": [
             "target_1",
