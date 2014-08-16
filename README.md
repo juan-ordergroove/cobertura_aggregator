@@ -55,10 +55,10 @@ Common settings:
 - TARGETS - list of folder/file names that you want summarized. They should be relative paths based on the current working directory of the test suite
 - REPORT_PATH - [optional] - path to write report file to
 
-For cobertura_xml TYPE you need to define:
+For *cobertura_xml* TYPE you need to define:
 - REPORTS - list of paths to Cobertura XML reports
 
-For cobertura_api TYPE you need to define:
+For *cobertura_api* TYPE you need to define:
 - USERNAME - your Jenkins username
 - API_TOKEN - the API token/key Jenkins generates for your user
 - DOMAIN - where is the location of the Jenkins' builds
