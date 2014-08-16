@@ -1,7 +1,8 @@
 """Cobertura aggregator tests"""
 import os
 import unittest
-from mock import patch
+import urllib2
+from mock import patch, MagicMock
 from base import CoberturaJSONAggregator
 
 API_SETTINGS = {
@@ -29,11 +30,62 @@ class CoberturaJSONAggregatorTests(unittest.TestCase):
             self._cobertura_json = fixture_file.read()
 
     @patch('base.urllib2.urlopen')
-    def test_report_generator(self, mock_urlopen):
-        mock_urlopen().read.return_value = self._cobertura_json
+    def test_report_generator(self, urlopen_mock):
+        urlopen_mock().read.return_value = self._cobertura_json
         self.aggregator.generate_report()
         expected_result = [
             ['club', '67.50%', '62.50%'],
             ['cron', '8.15%', '6.25%']
         ]
         self.assertEqual(self.aggregator._report, expected_result)
+
+    @patch('base.urllib2.urlopen')
+    @patch('base.LOGGER')
+    def test_http_error(self, logger_mock, urlopen_mock):
+        """Test urllib2.HTTPError exceptions"""
+        log = []
+        logger_mock.error.side_effect = log.append
+        logger_mock.info.side_effect = log.append
+
+        urlopen_mock.side_effect = urllib2.HTTPError(
+            "test",
+            404,
+            "test",
+            {},
+            MagicMock()
+        )
+        self.aggregator.generate_report()
+        http_error_results = [
+            'http://localhost/job/test/lastSuccessfulBuild/cobertura/api/json?depth=4\nHTTP error: HTTP Error 404: test'
+        ]
+        self.assertEqual(log, http_error_results)
+
+    @patch('base.urllib2.urlopen')
+    @patch('base.LOGGER')
+    def test_url_error(self, logger_mock, urlopen_mock):
+        """Test urllib2.URLError exceptions"""
+        log = []
+        logger_mock.error.side_effect = log.append
+        logger_mock.info.side_effect = log.append
+
+        urlerror_results = [
+            'http://localhost/job/test/lastSuccessfulBuild/cobertura/api/json?depth=4\nURL error: URL Error'
+        ]
+        urlopen_mock.side_effect = urllib2.URLError("URL Error")
+        self.aggregator.generate_report()
+        self.assertEqual(log, urlerror_results)
+
+    @patch('base.urllib2.urlopen')
+    @patch('base.LOGGER')
+    def test_simplejson_error(self, logger_mock, urlopen_mock):
+        """Test simplejson.loads error"""
+        log = []
+        logger_mock.error.side_effect = log.append
+        logger_mock.info.side_effect = log.append
+
+        urlopen_mock().read.return_value = '{'
+        self.aggregator.generate_report()
+        simplejson_error = [
+            "{\nCobertura URL did not return valid json: Expecting property name enclosed in double quotes or '}': line 1 column 2 (char 1)"
+        ]
+        self.assertEqual(log, simplejson_error)

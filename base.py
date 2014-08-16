@@ -1,11 +1,14 @@
 """Cobertura report aggregator for a given set of TARGETS"""
 import base64
 import calendar
+import logging
 import simplejson
 import time
 import urllib2
 import xml.etree.ElementTree as ET
 from tabulate import tabulate
+
+LOGGER = logging.getLogger()
 
 
 class CoberturaAggregator(object):
@@ -51,13 +54,14 @@ class CoberturaAggregator(object):
         """Print the report"""
         headers = ['Target', 'Line%', 'Branch%']
         table = tabulate(self._report, headers)
-        print """
+        LOGGER.info("""
 
 ---------
 {} REPORT
 ---------
 """.format(self._name)
-        print(table)
+        )
+        LOGGER.info(table)
 
         if self._report_path:
             with open(self._report_file, 'w+') as report_file:
@@ -157,16 +161,22 @@ class CoberturaJSONAggregator(CoberturaAggregator):
                 cobertura_json = resp.read()
                 cobertura_report = simplejson.loads(cobertura_json)
             except urllib2.HTTPError as e:
-                print "{}\nHTTP error: {}".format(cobertura_url, e)
+                LOGGER.error("{}\nHTTP error: {}".format(cobertura_url, e))
                 continue
             except urllib2.URLError as e:
-                print "{}\nURL error: {}".format(cobertura_url, e)
+                LOGGER.error("{}\nURL error: {}".format(
+                    cobertura_url,
+                    e.reason
+                    )
+                )
                 continue
             except simplejson.scanner.JSONDecodeError as e:
-                print "{}\nCobertura URL did not return valid json: {}".format(
-                    resp.read(),
-                    e
+                LOGGER.error(
+                    "{}\nCobertura URL did not return valid json: {}".format(
+                        resp.read(),
+                        e
                     )
+                )
                 continue
 
             # Drill down to what we care about...
