@@ -1,2 +1,2 @@
-from .cobertura import CoberturaJSONAggregatorTests
-from .coverage import CoverageXMLAggregatorTests
+from .api import CoberturaJSONAggregatorTests
+from .xml import CoberturaXMLAggregatorTests

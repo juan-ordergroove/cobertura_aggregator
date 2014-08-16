@@ -115,9 +115,11 @@ class CoberturaAggregator(object):
 
 class CoberturaJSONAggregator(CoberturaAggregator):
     """Cobertura REST JSON aggregator"""
-    COBERTURA_URL_KEY = 'COBERTURA_URLS'
     USERNAME_KEY = 'USERNAME'
     API_TOKEN_KEY = 'API_TOKEN'
+    DOMAIN_KEY = 'DOMAIN'
+    JOBS_KEY = 'JOBS'
+
     _LINES_KEY = 'Lines'
     _CONDITIONALS_KEY = 'Conditionals'
     _NUMERATOR_KEY = 'numerator'
@@ -125,9 +127,17 @@ class CoberturaJSONAggregator(CoberturaAggregator):
 
     def __init__(self, name=None, settings={}):
         super(CoberturaJSONAggregator, self).__init__(name, settings)
-        self._cobertura_urls = settings.get(self.COBERTURA_URL_KEY, [])
         self._username = settings.get(self.USERNAME_KEY)
         self._api_token = settings.get(self.API_TOKEN_KEY)
+        self._domain = settings.get(self.DOMAIN_KEY)
+        self._jobs = settings.get(self.JOBS_KEY, [])
+
+        coverage_uri = "lastSuccessfulBuild/cobertura/api/json?depth=4"
+        self._cobertura_urls = []
+        for job in self._jobs:
+            self._cobertura_urls.append(
+                "{}/job/{}/{}".format(self._domain, job, coverage_uri)
+                )
 
     def generate_report(self):
         for cobertura_url in self._cobertura_urls:
@@ -200,11 +210,11 @@ class CoberturaJSONAggregator(CoberturaAggregator):
 
 class CoberturaXMLAggregator(CoberturaAggregator):
     """Cobertura XML aggregator"""
-    COBERTURA_XML_KEY = 'REPORTS'
+    XML_FILES_KEY = 'XML_FILES'
 
     def __init__(self, name=None, settings={}):
         super(CoberturaXMLAggregator, self).__init__(name, settings)
-        self._cobertura_xml = settings.get(self.COBERTURA_XML_KEY, [])
+        self._cobertura_xml = settings.get(self.XML_FILES_KEY, [])
         self._xml_tree = None
 
     def generate_report(self):

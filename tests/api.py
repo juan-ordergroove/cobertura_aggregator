@@ -4,10 +4,11 @@ import unittest
 from mock import patch
 from base import CoberturaJSONAggregator
 
-COBERTURA_SETTINGS = {
-    CoberturaJSONAggregator.COBERTURA_URL_KEY: [
-        'http://localhost/jobs/build/196/cobertura/api/json?depth=4'
-    ],
+API_SETTINGS = {
+    CoberturaJSONAggregator.USERNAME_KEY: "test",
+    CoberturaJSONAggregator.API_TOKEN_KEY: "test",
+    CoberturaJSONAggregator.DOMAIN_KEY: "http://localhost",
+    CoberturaJSONAggregator.JOBS_KEY: ["test"],
     CoberturaJSONAggregator.TARGETS_KEY: [
         'club',
         'cron',
@@ -16,10 +17,10 @@ COBERTURA_SETTINGS = {
 
 
 class CoberturaJSONAggregatorTests(unittest.TestCase):
-    """Test cases for aggregating cobertura JSON via Jenkins REST API"""
+    """Test cases for aggregating Cobertura JSON via Jenkins REST API"""
     def setUp(self):
         self.test_name = 'test'
-        self.aggregator = CoberturaJSONAggregator(self.test_name, COBERTURA_SETTINGS)
+        self.aggregator = CoberturaJSONAggregator(self.test_name, API_SETTINGS)
         fixture_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
             'fixtures/cobertura.json'

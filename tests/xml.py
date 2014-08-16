@@ -1,14 +1,14 @@
-"""Coverage aggregator tests"""
+"""Cobertura aggregator tests"""
 import os
 import unittest
-from base import CoverageXMLAggregator
+from base import CoberturaXMLAggregator
 
-COVERAGE_SETTINGS = {
-    CoverageXMLAggregator.COVERAGE_XML_KEY: [os.path.join(
+XML_SETTINGS = {
+    CoberturaXMLAggregator.XML_FILES_KEY: [os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
-        'fixtures/coverage.xml'
+        'fixtures/cobertura.xml'
         )],
-    CoverageXMLAggregator.TARGETS_KEY: [
+    CoberturaXMLAggregator.TARGETS_KEY: [
         'mytests',
         'widget_core/v3/core-model.js',
         'widget_core/common/getElementsByRegex.js'
@@ -16,11 +16,11 @@ COVERAGE_SETTINGS = {
 }
 
 
-class CoverageXMLAggregatorTests(unittest.TestCase):
-    """Test cases for agggreating coverage XML"""
+class CoberturaXMLAggregatorTests(unittest.TestCase):
+    """Test cases for agggreating Cobertura XML"""
     def setUp(self):
         self.test_name = 'tests'
-        self.aggregator = CoverageXMLAggregator(self.test_name, COVERAGE_SETTINGS)
+        self.aggregator = CoberturaXMLAggregator(self.test_name, XML_SETTINGS)
 
     def test_report_generator(self):
         """Test generating a report"""
@@ -34,9 +34,9 @@ class CoverageXMLAggregatorTests(unittest.TestCase):
 
     def test_print_report(self):
         """Test report generation"""
-        settings = COVERAGE_SETTINGS
+        settings = XML_SETTINGS
         settings[self.aggregator.REPORT_PATH_KEY] = '/tmp'
-        self.aggregator.set_settings(self.test_name, COVERAGE_SETTINGS)
+        self.aggregator.set_settings(self.test_name, XML_SETTINGS)
 
         self.aggregator.generate_report()
         self.aggregator.print_report()
