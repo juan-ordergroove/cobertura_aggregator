@@ -1,4 +1,4 @@
-"""Coverage XML report aggregator for a given set of TARGETS"""
+"""Cobertura report aggregator for a given set of TARGETS"""
 import base64
 import calendar
 import simplejson
@@ -8,8 +8,8 @@ import xml.etree.ElementTree as ET
 from tabulate import tabulate
 
 
-class CoverageAggregator(object):
-    """Coverage aggregation base class"""
+class CoberturaAggregator(object):
+    """Cobertura aggregation base class"""
     REPORT_PATH_KEY = 'REPORT_PATH'
     TARGETS_KEY = 'TARGETS'
     TYPE_KEY = 'TYPE'
@@ -34,7 +34,7 @@ class CoverageAggregator(object):
             self._report_path = '{}/'.format(self._report_path)
 
         # /path/to/file/1387487334_cobertura_agg.txt
-        self._report_file = '{}{}_coverage_agg.txt'.format(
+        self._report_file = '{}{}_cobertura_agg.txt'.format(
             self._report_path,
             calendar.timegm(time.gmtime())
             )
@@ -113,7 +113,7 @@ class CoverageAggregator(object):
         self._target_stats[target] = stats
 
 
-class CoberturaJSONAggregator(CoverageAggregator):
+class CoberturaJSONAggregator(CoberturaAggregator):
     """Cobertura REST JSON aggregator"""
     COBERTURA_URL_KEY = 'COBERTURA_URLS'
     USERNAME_KEY = 'USERNAME'
@@ -198,17 +198,17 @@ class CoberturaJSONAggregator(CoverageAggregator):
         })
 
 
-class CoverageXMLAggregator(CoverageAggregator):
-    """Coverage XML aggregator"""
-    COVERAGE_XML_KEY = 'COVERAGE_XML'
+class CoberturaXMLAggregator(CoberturaAggregator):
+    """Cobertura XML aggregator"""
+    COBERTURA_XML_KEY = 'REPORTS'
 
     def __init__(self, name=None, settings={}):
-        super(CoverageXMLAggregator, self).__init__(name, settings)
-        self._coverage_xml = settings.get(self.COVERAGE_XML_KEY, [])
+        super(CoberturaXMLAggregator, self).__init__(name, settings)
+        self._cobertura_xml = settings.get(self.COBERTURA_XML_KEY, [])
         self._xml_tree = None
 
     def generate_report(self):
-        for cobertura_report in self._coverage_xml:
+        for cobertura_report in self._cobertura_xml:
             xml_tree = ET.parse(cobertura_report)
 
             root = xml_tree.getroot()
