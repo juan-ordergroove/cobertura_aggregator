@@ -1,17 +1,14 @@
 """Cobertura aggregation runner"""
-import imp
 import argparse
+import imp
+from cli_tools import argument
 from base import CoberturaXMLAggregator, CoberturaJSONAggregator
 
 
-def run():
+@argument('--config', type=str, help="Path to aggregator configuration file")
+def run(config):
     """runner"""
-    parser = argparse.ArgumentParser()
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--config', type=str)
-    args = parser.parse_args()
-
-    settings_mod = imp.load_source('SETTINGS', args.config)
+    settings_mod = imp.load_source('SETTINGS', config)
     settings_dict = settings_mod.SETTINGS
 
     # Convert to use python argparse built in
@@ -29,5 +26,7 @@ def run():
         aggregator.print_report()
 
 if __name__ == '__main__':
-
-    run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', type=str)
+    args = parser.parse_args()
+    run(args.config)

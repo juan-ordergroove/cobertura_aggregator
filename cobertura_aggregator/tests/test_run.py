@@ -15,7 +15,7 @@ class CLIRunnerTests(unittest.TestCase):
         mock_settings.SETTINGS = {'test': {'TYPE': 'xml'}}
         imp_mock.load_source.return_value = mock_settings
         xml_mock.TYPE_KEY = 'TYPE'
-        run()
+        run('')
 
         xml_mock().set_settings.assert_called_once_with(
             'test', {'TYPE': 'xml'}
@@ -25,7 +25,7 @@ class CLIRunnerTests(unittest.TestCase):
 
         mock_settings.SETTINGS = {'test': {'TYPE': 'jenkins_api'}}
         imp_mock.load_source.return_value = mock_settings
-        run()
+        run('')
 
         api_mock().set_settings.assert_called_once_with(
             'test', {'TYPE': 'jenkins_api'}
@@ -35,4 +35,4 @@ class CLIRunnerTests(unittest.TestCase):
 
         mock_settings.SETTINGS = {'test': {'TYPE': 'test'}}
         imp_mock.load_source.return_value = mock_settings
-        self.assertRaises(UnboundLocalError, run)
+        self.assertRaises(UnboundLocalError, run, '')

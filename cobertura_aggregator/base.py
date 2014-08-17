@@ -54,14 +54,13 @@ class CoberturaAggregator(object):
         """Print the report"""
         headers = ['Target', 'Line%', 'Branch%']
         table = tabulate(self._report, headers)
-        LOGGER.info("""
+        print """
 
 ---------
 {} REPORT
 ---------
 """.format(self._name)
-        )
-        LOGGER.info(table)
+        print table
 
         if self._report_path:
             with open(self._report_file, 'w+') as report_file:
