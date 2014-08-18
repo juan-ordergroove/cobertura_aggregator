@@ -54,7 +54,7 @@ You can mix and match as many of these objects as you like in your settings file
 
 #### SETTINGS dictionary parameters
 - "NAME" - the application/project name you'd like to define for a config - this can be whatever you like
-- TYPE - [__*jenkins_api*__ OR __*xml*__] the format type aggregation against
+- TYPE - [__*jenkins_api*__ OR __*xml*__] the format type to aggregate
 - TARGETS - list of folder/file names that you want summarized. They should be relative paths based on the current working directory of the test suite
 - REPORT_PATH - [optional] - path to write report file to
 
@@ -66,6 +66,18 @@ For __*jenkins_api*__ TYPE you need to define:
 - API_TOKEN - the API token/key Jenkins generates for your user
 - DOMAIN - where is the location of the Jenkins' jobs and builds
 - JOBS - list of jobs to include in your aggregation
+
+#### Sample output
+```
+---------
+NAME REPORT
+---------
+
+Target     Line%    Branch%
+---------  -------  ---------
+target1    68.66%   47.42%
+target2    29.71%   27.00%
+```
 
 #### External Packages
 - https://pypi.python.org/pypi/tabulate
