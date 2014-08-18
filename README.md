@@ -52,7 +52,7 @@ You can mix and match as many of these objects as you like in your settings file
 }
 ```
 
-#### SETTINGS dictionary parameter
+#### SETTINGS dictionary parameters
 - "NAME" - the application/project name you'd like to define for a config - this can be whatever you like
 - TYPE - [__*jenkins_api*__ OR __*xml*__] the format type aggregation against
 - TARGETS - list of folder/file names that you want summarized. They should be relative paths based on the current working directory of the test suite
