@@ -4,6 +4,7 @@ setup(
     name="cobertura-aggregator",
     version="0.1",
     packages=find_packages(),
+    license="Creative Commons Attribution-Noncommercial-Share Alike license",
     author="Juan Gutierrez",
     description="Cobertura folder coverage aggregator",
     url="https://github.com/juannyg/cobertura_aggregator/",
